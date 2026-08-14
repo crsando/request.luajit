@@ -357,6 +357,11 @@ response:raise_for_status()
 保存在 `trailers`。`raise_for_status()` 在 4xx/5xx 时抛出包含 response 的结构化 HTTP
 错误，否则返回 response 本身；它是可选的显式检查，库不会自动抛出 HTTP 状态错误。
 
+当字段名恰好是 `get`、`get_all` 或 `each` 等便利方法名时，下标访问优先返回字段值；此时
+可使用 `local Headers = require("request.headers")` 后调用 `Headers.get(headers, name)`、
+`Headers.get_all(headers, name)` 或 `Headers.each(headers)`，避免 Lua 方法查找和字段查找的
+名字冲突。
+
 ### 5.7 Error
 
 所有运行期错误使用同一结构：
@@ -375,7 +380,7 @@ response:raise_for_status()
 `kind` 包括 `curl`、`timeout`、`cancelled`、`limit`、`protocol` 和 `internal`；
 `raise_for_status()` 另外使用 `http`。error 实现 `__tostring`，所以 `print(err)` 可以
 直接得到可读消息。libcurl 错误保留数字 code、符号 name 和 `CURLOPT_ERRORBUFFER` 的
-消息。
+消息；不支持的协议、URL 格式错误和 libcurl 不内置的协议能力归类为 `protocol`。
 
 用户 callback 在 task 状态和 native 资源完成清理后才执行。callback 异常交给 session
 的 `on_callback_error`；默认输出带 traceback 的错误，但不破坏其他请求。默认 session

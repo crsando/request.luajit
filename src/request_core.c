@@ -1393,6 +1393,12 @@ int luaopen_request_core(lua_State *lua)
     lua_setfield(lua, -2, "CSELECT_ERR");
     lua_pushinteger(lua, CURLE_OPERATION_TIMEDOUT);
     lua_setfield(lua, -2, "CURLE_OPERATION_TIMEDOUT");
+    lua_pushinteger(lua, CURLE_UNSUPPORTED_PROTOCOL);
+    lua_setfield(lua, -2, "CURLE_UNSUPPORTED_PROTOCOL");
+    lua_pushinteger(lua, CURLE_URL_MALFORMAT);
+    lua_setfield(lua, -2, "CURLE_URL_MALFORMAT");
+    lua_pushinteger(lua, CURLE_NOT_BUILT_IN);
+    lua_setfield(lua, -2, "CURLE_NOT_BUILT_IN");
 
     return 1;
 }

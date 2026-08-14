@@ -131,6 +131,36 @@ t.test("response header blocks and duplicates", function()
     t.equal(parsed.history[1].status_code, 100)
 end)
 
+t.test("header field names take precedence over convenience methods", function()
+    local headers = Headers.new({
+        { name = "get", value = "field-value" },
+        { name = "set-cookie", value = "one" },
+        { name = "set-cookie", value = "two" },
+    })
+
+    t.equal(headers["GET"], "field-value")
+    t.equal(Headers.get(headers, "get"), "field-value")
+    t.equal(#Headers.get_all(headers, "set-cookie"), 2)
+end)
+
+t.test("response header parser handles continuations and rejects malformed lines", function()
+    local parsed = assert(Headers.parse(table.concat({
+        "HTTP/1.1 200 OK\r\n",
+        "x-folded: first\r\n",
+        " second\r\n",
+        "\r\n",
+    })))
+
+    t.equal(parsed.headers["x-folded"], "first second")
+    local malformed, err = Headers.parse(table.concat({
+        "HTTP/1.1 200 OK\r\n",
+        "malformed\r\n",
+        "\r\n",
+    }))
+    t.equal(malformed, nil)
+    t.matches(err, "malformed response header")
+end)
+
 t.test("await rejects the main Lua thread", function()
     local task = Task.new({}, nil)
 

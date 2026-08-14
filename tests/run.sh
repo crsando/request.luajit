@@ -4,6 +4,8 @@ set -euo pipefail
 
 project_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 build_dir=${REQUEST_BUILD_DIR:-"$project_dir/build"}
+build_type=${REQUEST_BUILD_TYPE:-Debug}
+luajit_bin=${REQUEST_LUAJIT:-luajit}
 test_dir=$(mktemp -d)
 http_port=${REQUEST_TEST_HTTP_PORT:-0}
 https_port=${REQUEST_TEST_HTTPS_PORT:-0}
@@ -30,7 +32,7 @@ cleanup() {
 
 trap cleanup EXIT
 
-cmake -S "$project_dir" -B "$build_dir" -DCMAKE_BUILD_TYPE=Debug
+cmake -S "$project_dir" -B "$build_dir" -DCMAKE_BUILD_TYPE="$build_type"
 cmake --build "$build_dir" --parallel
 
 cat >"$test_dir/openssl.cnf" <<'EOF'
@@ -108,5 +110,17 @@ export REQUEST_TEST_CLIENT_CERT_FILE="$test_dir/server.crt"
 export REQUEST_TEST_CLIENT_KEY_FILE="$test_dir/server.key"
 
 cd "$project_dir"
-luajit tests/unit_spec.lua
-luajit tests/integration_spec.lua
+run_luajit() {
+    if [[ -n "${REQUEST_LUAJIT_PRELOAD:-}" ]]; then
+        if [[ "$(uname -s)" == "Darwin" ]]; then
+            DYLD_INSERT_LIBRARIES="$REQUEST_LUAJIT_PRELOAD" "$luajit_bin" "$@"
+        else
+            LD_PRELOAD="$REQUEST_LUAJIT_PRELOAD" "$luajit_bin" "$@"
+        fi
+    else
+        "$luajit_bin" "$@"
+    fi
+}
+
+run_luajit tests/unit_spec.lua
+run_luajit tests/integration_spec.lua

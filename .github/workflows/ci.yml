@@ -45,3 +45,24 @@ jobs:
 
             - name: Test
               run: tests/run.sh
+
+    sanitizer:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y \
+                      build-essential \
+                      cmake \
+                      libcurl4-openssl-dev \
+                      libluajit-5.1-dev \
+                      libuv1-dev \
+                      lua-luv \
+                      luajit \
+                      pkg-config
+
+            - name: Test with sanitizers
+              run: make asan-test

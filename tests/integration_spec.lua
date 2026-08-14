@@ -183,6 +183,7 @@ t.test("redirect history and HTTP status semantics", function()
 
         response, err = request.get(base_url .. "/redirect-file"):await()
         t.equal(response, nil)
+        t.equal(err.kind, "protocol")
         t.equal(err.name, "CURLE_UNSUPPORTED_PROTOCOL")
 
         local missing = await(request.get(base_url .. "/status/404"))

@@ -9,7 +9,8 @@ local function normalize_name(name)
 end
 
 function methods:get(name, default)
-    local values = self._map[normalize_name(name)]
+    local normalized = normalize_name(name)
+    local values = normalized and self._map[normalized]
 
     if not values or values[1] == nil then
         return default
@@ -19,7 +20,8 @@ function methods:get(name, default)
 end
 
 function methods:get_all(name)
-    local values = self._map[normalize_name(name)]
+    local normalized = normalize_name(name)
+    local values = normalized and self._map[normalized]
     local result = {}
 
     if not values then
@@ -49,6 +51,12 @@ end
 
 local metatable = {
     __index = function(self, key)
+        local normalized = normalize_name(key)
+        local values = normalized and self._map[normalized]
+        if values and values[1] ~= nil then
+            return values[1]
+        end
+
         local method = methods[key]
         if method then
             return method
@@ -59,6 +67,19 @@ local metatable = {
 }
 
 local M = {}
+
+-- Module-level accessors remain available when a field name matches a method name.
+function M.get(headers, name, default)
+    return methods.get(headers, name, default)
+end
+
+function M.get_all(headers, name)
+    return methods.get_all(headers, name)
+end
+
+function M.each(headers)
+    return methods.each(headers)
+end
 
 function M.new(items)
     local headers = {

@@ -51,6 +51,10 @@ local function request_error(completion)
         )
     elseif completion.curl_code == core.CURLE_OPERATION_TIMEDOUT then
         kind = "timeout"
+    elseif completion.curl_code == core.CURLE_UNSUPPORTED_PROTOCOL or
+        completion.curl_code == core.CURLE_URL_MALFORMAT or
+        completion.curl_code == core.CURLE_NOT_BUILT_IN then
+        kind = "protocol"
     end
 
     return Error.new({

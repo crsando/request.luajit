@@ -37,6 +37,14 @@ If Homebrew's keg-only curl is not found, add its prefix to `CMAKE_PREFIX_PATH`.
 
 ## Build
 
+The Makefile provides a small wrapper around the CMake build:
+
+```sh
+make build
+make test
+sudo make install PREFIX=/usr/local
+```
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
@@ -164,8 +172,5 @@ tests/run.sh
 To include AddressSanitizer and UndefinedBehaviorSanitizer:
 
 ```sh
-cmake -S . -B build-asan \
-    -DCMAKE_BUILD_TYPE=Debug \
-    -DREQUEST_ENABLE_SANITIZERS=ON
-cmake --build build-asan --parallel
+make asan-test
 ```
