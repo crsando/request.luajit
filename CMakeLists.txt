@@ -138,13 +138,15 @@ include(GNUInstallDirs)
 if(REQUEST_LUA_LIBDIR)
     set(REQUEST_NATIVE_DESTINATION "${REQUEST_LUA_LIBDIR}/request")
 else()
-    set(REQUEST_NATIVE_DESTINATION "${CMAKE_INSTALL_LIBDIR}/lua/5.1/request")
+    # Not CMAKE_INSTALL_LIBDIR: on Debian/Ubuntu with prefix /usr that becomes
+    # lib/<multiarch>, which is not on LuaJIT's default package.cpath.
+    set(REQUEST_NATIVE_DESTINATION "lib/lua/5.1/request")
 endif()
 
 if(REQUEST_LUA_DIR)
     set(REQUEST_LUA_DESTINATION "${REQUEST_LUA_DIR}")
 else()
-    set(REQUEST_LUA_DESTINATION "${CMAKE_INSTALL_DATADIR}/lua/5.1")
+    set(REQUEST_LUA_DESTINATION "share/lua/5.1")
 endif()
 
 install(TARGETS request_core LIBRARY DESTINATION "${REQUEST_NATIVE_DESTINATION}")

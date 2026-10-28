@@ -183,7 +183,14 @@ def main():
     parser.add_argument("--client-ca")
     args = parser.parse_args()
 
-    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    # socketserver's default listen backlog is 5. Linux keeps excess SYNs
+    # waiting, but macOS resets them, which breaks the concurrent-requests
+    # test (12 parallel connections) with "Connection reset by peer".
+    class Server(ThreadingHTTPServer):
+        request_queue_size = 128
+        daemon_threads = True
+
+    server = Server((args.host, args.port), Handler)
     if args.cert:
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(args.cert, args.key)
